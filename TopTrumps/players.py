@@ -47,7 +47,7 @@ Force Factor: {card.force_factor}
 
         while not user_choice_valid:
             user_choice = input("\nSelect your stat: ")
-            if user_choice.lower().replace(' ', '') in valid_stats: # valid stats are being determined invalid - why?
+            if user_choice.lower().replace(' ', '') in valid_stats:
                 user_choice_valid = True
             else:
                 print("\nInvalid choice.")
