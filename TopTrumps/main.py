@@ -67,7 +67,7 @@ class Game:
         with open('deck.csv', newline='') as csvfile:
             reader = csv.reader(csvfile)
 
-            self.valid_stats = map(self.clean_stat, reader.__next__()[2:])
+            self.valid_stats = list(map(self.clean_stat, reader.__next__()[2:]))
             for item in self.valid_stats:
                 print(item)
 
