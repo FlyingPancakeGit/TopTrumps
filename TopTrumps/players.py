@@ -1,3 +1,5 @@
+import random
+
 class Computer:
     def __init__(self, name):
         self.name = name
@@ -8,8 +10,9 @@ class Computer:
     def add_card(self, card):
         self.deck.append(card)
 
-    def select_stat(self, card):
-        pass
+    def select_stat(self, card, valid_stats):
+        computer_choice = random.choice(valid_stats)
+        return getattr(card, computer_choice)
 
 
 class User:
@@ -28,6 +31,9 @@ class User:
     def add_card(self, card):
         self.deck.append(card)
 
+    def display_stats(self):
+        print(f'Card Count: {len(self.deck)}')
+
     def display_card(self, card):
         print(f'''
 ----------------
@@ -36,18 +42,25 @@ Owner(s): {card.owners}
 
 Size: {card.size}
 Speed: {card.speed}
-Firepower: {card.fire_power}
+Firepower: {card.firepower}
 Maneuvering: {card.maneuvering}
-Force Factor: {card.force_factor}
+Force Factor: {card.forcefactor}
 ----------------''')
 
-    def select_stat(self, valid_stats):
+    def display(self, card):
+        self.display_stats()
+        self.display_card(card)
+
+    def select_stat(self, card, valid_stats):
         user_choice_valid = False
         user_choice = None
 
         while not user_choice_valid:
-            user_choice = input("\nSelect your stat: ")
-            if user_choice.lower().replace(' ', '') in valid_stats:
+            user_choice = input("\nSelect your stat: ").lower().replace(' ', '')
+            if user_choice in valid_stats:
                 user_choice_valid = True
             else:
-                print("\nInvalid choice.")
+                print('\nInvalid choice.')
+        
+        return getattr(card, user_choice)
+

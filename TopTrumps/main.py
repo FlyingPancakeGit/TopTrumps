@@ -50,6 +50,7 @@ class Game:
 
         self.computer_names = ['Alfie', 'Ben', 'Charlie']
         self.players = []
+        self.winner = None
 
     def clean_stat(self, stat):
         return stat.lower().replace(' ', '')
@@ -60,6 +61,7 @@ class Game:
         self.players.append(computer)
 
         user_name = input('\nEnter your name: ')
+
         user = User(user_name)
         self.players.append(user)
 
@@ -68,8 +70,6 @@ class Game:
             reader = csv.reader(csvfile)
 
             self.valid_stats = list(map(self.clean_stat, reader.__next__()[2:]))
-            for item in self.valid_stats:
-                print(item)
 
             for row in reader:
                 card = Card(*row)
@@ -87,6 +87,20 @@ class Game:
             index = random.randint(0, len(self.deck)-1)
             card = self.deck[index]
             self.players[1].add_card(card)
+    
+    def transfer_card(self, user, computer, user_stat, computer_stat):
+        print('\n' * 32)
+        if user_stat > computer_stat:
+            print('User wins!')
+            user.deck.append(computer.deck[computer.current_index])
+            computer.deck.remove(computer.deck[computer.current_index])
+        else:
+            print('Computer wins!')
+            computer.deck.append(user.deck[user.current_index])
+            user.deck.remove(user.deck[user.current_index])
+    
+    def check_for_win(self, user, computer):
+        if len(user.deck())
 
     def game_setup(self):
         self.load_deck()
@@ -98,8 +112,20 @@ class Game:
         user = self.players[1]
 
         while self.running:
-            user.display_card(self.deck[user.current_index])
-            user.select_stat(self.valid_stats)
+            print('\n' * 32)
+
+            current_card = user.deck[user.current_index]
+            user.display(current_card)
+            user_stat = user.select_stat(current_card, self.valid_stats)
+
+            current_card = computer.deck[computer.current_index]
+            computer_stat = computer.select_stat(current_card, self.valid_stats)
+
+            self.transfer_card(user, computer, user_stat, computer_stat)
+            input('\nEnter to continue: ')
+            
+            user.current_index += 1
+            computer.current_index += 1
 
     def play(self):
         self.game_setup()

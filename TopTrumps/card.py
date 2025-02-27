@@ -1,9 +1,10 @@
 class Card:
-    def __init__(self, name, owners, size, speed, fire_power, maneuvering, force_factor):
+    def __init__(self, name, owners, size, speed, firepower, maneuvering, forcefactor):
         self.name = name
         self.owners = owners
+        
         self.size = size
         self.speed = speed
-        self.fire_power = fire_power
+        self.firepower = firepower
         self.maneuvering = maneuvering
-        self.force_factor = force_factor
+        self.forcefactor = forcefactor
