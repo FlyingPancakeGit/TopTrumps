@@ -100,7 +100,7 @@ class Game:
             user.deck.remove(user.deck[user.current_index])
     
     def check_for_win(self, user, computer):
-        if len(user.deck())
+        pass
 
     def game_setup(self):
         self.load_deck()
