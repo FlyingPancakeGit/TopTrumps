@@ -1,7 +1,6 @@
 import random
 import csv
 
-
 from players import *
 from card import Card
 
@@ -9,14 +8,14 @@ from card import Card
 class Main:
     def __init__(self):
         self.menu = Menu()
+        self.menu.menu_loop()
 
 
 class Menu:
     def __init__(self):
         self.game = Game()
-        self.game.play()
 
-    def display(self):
+    def display_menu(self):
         print('Welcome to Top Trumps!\n\nOptions:'
               '\n\t1: Play Game'
               '\n\t2: Quit')
@@ -36,9 +35,16 @@ class Menu:
 
     def check_input(self, input):
         if input == '1':
-            pass
+            self.game.play()
         elif input == '2':
             exit()
+
+    def menu_loop(self):
+        while True:
+            self.display_menu()
+
+            user_choice = self.get_input()
+            self.check_input(user_choice)
 
 
 class Game:
@@ -60,6 +66,7 @@ class Game:
         computer = Computer(computer_name)
         self.players.append(computer)
 
+        print('\n' * 32)
         user_name = input('\nEnter your name: ')
 
         user = User(user_name)
@@ -79,28 +86,43 @@ class Game:
         deck_size = len(self.deck)
 
         for i in range(int(deck_size / 2)):
-            index = random.randint(0, len(self.deck)-1)
+            index = random.randint(0, len(self.deck) - 1)
             card = self.deck[index]
             self.players[0].add_card(card)
+            self.deck.pop(index)
 
         for i in range(int(deck_size / 2)):
-            index = random.randint(0, len(self.deck)-1)
+            index = random.randint(0, len(self.deck) - 1)
             card = self.deck[index]
             self.players[1].add_card(card)
-    
+            self.deck.pop(index)
+
     def transfer_card(self, user, computer, user_stat, computer_stat):
         print('\n' * 32)
         if user_stat > computer_stat:
-            print('User wins!')
+            print(f'{user.name} wins!')
             user.deck.append(computer.deck[computer.current_index])
             computer.deck.remove(computer.deck[computer.current_index])
-        else:
-            print('Computer wins!')
+        elif user_stat < computer_stat:
+            print(f'{computer.name} wins!')
             computer.deck.append(user.deck[user.current_index])
             user.deck.remove(user.deck[user.current_index])
-    
+        else:
+            print('Insert draw logic here.')
+
     def check_for_win(self, user, computer):
-        pass
+        if len(user.deck) == 0 or len(computer.deck) == 0:
+            return True
+        else:
+            return False
+
+    def display_game_over(self, user, computer):
+        print('\n' * 32)
+        print('Game over!')
+        if len(user.deck) == 0:
+            print(f'{user.name} lost.')
+        else:
+            print(f'{user.name} wins!')
 
     def game_setup(self):
         self.load_deck()
@@ -116,14 +138,20 @@ class Game:
 
             current_card = user.deck[user.current_index]
             user.display(current_card)
-            user_stat = user.select_stat(current_card, self.valid_stats)
+            user_stat_name = user.select_stat(current_card, self.valid_stats)
+            user_stat = getattr(current_card, user_stat_name)
 
             current_card = computer.deck[computer.current_index]
-            computer_stat = computer.select_stat(current_card, self.valid_stats)
+            computer_stat = getattr(current_card, user_stat_name)
+
 
             self.transfer_card(user, computer, user_stat, computer_stat)
+            print(user_stat, computer_stat)
             input('\nEnter to continue: ')
-            
+
+            if self.check_for_win(user, computer):
+                self.running = False
+
             user.current_index += 1
             computer.current_index += 1
 
