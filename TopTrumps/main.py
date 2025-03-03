@@ -122,7 +122,7 @@ class Game:
         if len(user.deck) == 0:
             print(f'{user.name} lost.')
         else:
-            print(f'{user.name} wins!')
+            print(f'{computer.name} wins!')
 
     def game_setup(self):
         self.load_deck()
