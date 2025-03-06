@@ -52,10 +52,16 @@ class Game:
         self.running = True
 
         self.deck = []
+
         self.valid_stats = []
+        self.display_stats = []
+        self.stat_dict = {}
 
         self.computer_names = ['Alfie', 'Ben', 'Charlie']
-        self.players = []
+        self.computer = None
+        self.user = None
+
+        self.current_chooser = 'user'
         self.winner = None
 
     def clean_stat(self, stat):
@@ -63,20 +69,21 @@ class Game:
 
     def generate_players(self):
         computer_name = random.choice(self.computer_names)
-        computer = Computer(computer_name)
-        self.players.append(computer)
+        self.computer = Computer(computer_name)
 
         print('\n' * 32)
         user_name = input('\nEnter your name: ')
 
-        user = User(user_name)
-        self.players.append(user)
+        self.user = User(user_name)
 
     def load_deck(self):
         with open('deck.csv', newline='') as csvfile:
             reader = csv.reader(csvfile)
+            stats = reader.__next__()[2:]
 
-            self.valid_stats = list(map(self.clean_stat, reader.__next__()[2:]))
+            self.valid_stats = list(map(self.clean_stat, stats))
+            self.display_stats = list(stats)
+            self.stat_dict = dict(zip(self.valid_stats, self.display_stats))
 
             for row in reader:
                 card = Card(*row)
@@ -88,30 +95,32 @@ class Game:
         for i in range(int(deck_size / 2)):
             index = random.randint(0, len(self.deck) - 1)
             card = self.deck[index]
-            self.players[0].add_card(card)
+            self.computer.add_card(card)
             self.deck.pop(index)
 
         for i in range(int(deck_size / 2)):
             index = random.randint(0, len(self.deck) - 1)
             card = self.deck[index]
-            self.players[1].add_card(card)
+            self.user.add_card(card)
             self.deck.pop(index)
 
-    def transfer_card(self, user, computer, user_stat, computer_stat):
+    def transfer_card(self, user_stat, computer_stat):
         print('\n' * 32)
         if user_stat > computer_stat:
-            print(f'{user.name} wins!')
-            user.deck.append(computer.deck[computer.current_index])
-            computer.deck.remove(computer.deck[computer.current_index])
+            print(f'{self.user.name} wins!')
+            self.user.deck.append(self.computer.deck[self.computer.current_index])
+            self.computer.deck.remove(self.computer.deck[self.computer.current_index])
+            self.current_chooser = 'user'
         elif user_stat < computer_stat:
-            print(f'{computer.name} wins!')
-            computer.deck.append(user.deck[user.current_index])
-            user.deck.remove(user.deck[user.current_index])
+            print(f'{self.computer.name} wins!')
+            self.computer.deck.append(self.user.deck[self.user.current_index])
+            self.user.deck.remove(self.user.deck[self.user.current_index])
+            self.current_chooser = 'computer'
         else:
             print('Insert draw logic here.')
 
-    def check_for_win(self, user, computer):
-        if len(user.deck) == 0 or len(computer.deck) == 0:
+    def check_for_win(self):
+        if len(self.user.deck) == 0 or len(self.computer.deck) == 0:
             return True
         else:
             return False
@@ -122,7 +131,7 @@ class Game:
         if len(user.deck) == 0:
             print(f'{user.name} lost.')
         else:
-            print(f'{computer.name} wins!')
+            print(f'{user.name} wins!')
 
     def game_setup(self):
         self.load_deck()
@@ -130,30 +139,43 @@ class Game:
         self.deal_cards()
 
     def game_loop(self):
-        computer = self.players[0]
-        user = self.players[1]
-
         while self.running:
             print('\n' * 32)
 
-            current_card = user.deck[user.current_index]
-            user.display(current_card)
-            user_stat_name = user.select_stat(current_card, self.valid_stats)
-            user_stat = getattr(current_card, user_stat_name)
+            user_stat = None
+            computer_stat = None
+            
+            if self.current_chooser == 'user':
+                current_card = self.user.deck[self.user.current_index]
+                self.user.display(current_card)
+                user_stat_name = self.user.select_stat(current_card, self.valid_stats)
+                user_stat = getattr(current_card, user_stat_name)
 
-            current_card = computer.deck[computer.current_index]
-            computer_stat = getattr(current_card, user_stat_name)
+                current_card = self.computer.deck[self.computer.current_index]
+                computer_stat = getattr(current_card, user_stat_name)
 
+                self.current_chooser = self.computer
+            elif self.current_chooser == 'computer':
+                current_card = self.computer.deck[self.computer.current_index]
+                computer_stat_name = self.computer.select_stat(current_card, self.valid_stats)
+                computer_stat = getattr(current_card, computer_stat_name)
 
-            self.transfer_card(user, computer, user_stat, computer_stat)
-            print(user_stat, computer_stat)
+                current_card = self.user.deck[self.user.current_index]
+                user_stat = getattr(current_card, user_stat_name)
+
+                print(f'{self.computer.name} chose {self.stat_dict[computer_stat_name]}.')
+                input('\nEnter to continue: ')
+            else:
+                print('Error.')
+
+            self.transfer_card(user_stat, computer_stat)
             input('\nEnter to continue: ')
 
-            if self.check_for_win(user, computer):
+            if self.check_for_win():
                 self.running = False
 
-            user.current_index += 1
-            computer.current_index += 1
+            self.user.current_index += 1
+            self.computer.current_index += 1
 
     def play(self):
         self.game_setup()
