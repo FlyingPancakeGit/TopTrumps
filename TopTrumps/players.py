@@ -7,6 +7,12 @@ class Computer:
         self.deck = []
         self.current_index = 0
 
+    def increment_index(self):
+        if self.current_index < len(self.deck) - 1:
+            self.current_index += 1
+        else:
+            self.current_index = 0
+
     def add_card(self, card):
         self.deck.append(card)
 
