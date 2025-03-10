@@ -63,6 +63,9 @@ class Game:
 
         self.current_chooser = 'user'
         self.winner = None
+        self.rounds = 0
+
+        self.stat_file = 'stats.csv'
 
     def clean_stat(self, stat):
         return stat.lower().replace(' ', '')
@@ -123,7 +126,11 @@ class Game:
 
 
     def check_for_win(self):
-        if len(self.user.deck) == 0 or len(self.computer.deck) == 0:
+        if len(self.user.deck) == 0:
+            self.winner = self.computer
+            return True
+        elif len(self.computer.deck) == 0:
+            self.winner = self.user
             return True
         else:
             return False
@@ -186,6 +193,11 @@ class Game:
     def play(self):
         self.game_setup()
         self.game_loop()
+        self.write_game_stats()
+
+    def write_game_stats(self):
+        with open(self.stat_file, 'a') as file:
+            file.write('\n' + self.winner.name)
 
 
 if __name__ == "__main__":
