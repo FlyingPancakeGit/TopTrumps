@@ -17,8 +17,7 @@ class Computer:
         self.deck.append(card)
 
     def select_stat(self, card, valid_stats):
-        computer_choice = random.choice(valid_stats)
-        return getattr(card, computer_choice)
+        return random.choice(valid_stats)
 
 
 class User:
@@ -68,5 +67,4 @@ Force Factor: {card.forcefactor}
             else:
                 print('\nInvalid choice.')
         
-        return getattr(card, user_choice)
-
+        return user_choice
